@@ -20,7 +20,7 @@ pipeline {
 			steps {
 				script {
 					echo "빌드 수행"
-                    sh "cd frontend; npm run build"
+                    sh "cd frontend; npm install; npm run build"
                     // sh "cd front-end; npm install && npm run build --mode=development"
                     sh "mvn -U clean package -DskipTests=true -f pom.xml"
 				}
