@@ -3,6 +3,10 @@ import {useAccountStore} from "@/stores/account";
 
 const instance = axios.create();
 
+// New lines to allow credentials and CSRF token handling
+instance.defaults.withCredentials = true;
+instance.defaults.withXSRFToken = true;
+
 // 인터셉터(응답 시)
 instance.interceptors.response.use((res) => {
     return res;
@@ -59,9 +63,15 @@ const generateConfig = () => {
         return {
             headers: {authorization: `Bearer ${accountStore.accessToken}`}
         };
-    }
+    } 
+    
+    const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+    console.log("CSRF Token: ", csrfToken);
 
-    return {};
+    return {headers: { 'X-CSRF-TOKEN': csrfToken }};
 };
 
 export default {

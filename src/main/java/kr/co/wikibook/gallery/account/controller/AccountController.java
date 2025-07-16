@@ -1,23 +1,28 @@
 package kr.co.wikibook.gallery.account.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import kr.co.wikibook.gallery.account.dto.AccountJoinRequest;
-import kr.co.wikibook.gallery.account.dto.AccountLoginRequest;
-import kr.co.wikibook.gallery.account.helper.AccountHelper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
-import kr.co.wikibook.gallery.common.util.TokenUtils;
-import kr.co.wikibook.gallery.block.service.BlockService;
-import kr.co.wikibook.gallery.common.util.HttpUtils;
-import kr.co.wikibook.gallery.account.etc.AccountConstants;
-
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletRequest;
+import kr.co.wikibook.gallery.account.dto.AccountJoinRequest;
+import kr.co.wikibook.gallery.account.etc.AccountConstants;
+import kr.co.wikibook.gallery.account.helper.AccountHelper;
+import kr.co.wikibook.gallery.block.service.BlockService;
+import kr.co.wikibook.gallery.common.util.HttpUtils;
+import kr.co.wikibook.gallery.common.util.TokenUtils;
 import kr.co.wikibook.gallery.member.service.MemberService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,32 +49,41 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/api/account/login")
-    public ResponseEntity<?> login(HttpServletRequest req, HttpServletResponse res, @RequestBody AccountLoginRequest loginReq) {
-        // 입력 값이 비어 있다면
-        if (!StringUtils.hasLength(loginReq.getLoginId()) || !StringUtils.hasLength(loginReq.getLoginPw())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        String output = accountHelper.login(loginReq, req, res);
-
-        if (output == null) { // 로그인 실패 시
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(output, HttpStatus.OK);
-    }
+//    @PostMapping("/api/account/login")
+//    public ResponseEntity<?> login(HttpServletRequest req, HttpServletResponse res, @RequestBody AccountLoginRequest loginReq) {
+//        // 입력 값이 비어 있다면
+//        if (!StringUtils.hasLength(loginReq.getUsername()) || !StringUtils.hasLength(loginReq.getPassword())) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//
+//        String output = accountHelper.login(loginReq, req, res);
+//
+//        if (output == null) { // 로그인 실패 시
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//
+//        return new ResponseEntity<>(output, HttpStatus.OK);
+//    }
 
     @GetMapping("/api/account/check")
     public ResponseEntity<?> check(HttpServletRequest req) {
-        return new ResponseEntity<>(accountHelper.isLoggedIn(req), HttpStatus.OK);
+        return new ResponseEntity<>(isAuthenticated(), HttpStatus.OK);
+//        return new ResponseEntity<>(accountHelper.isLoggedIn(req), HttpStatus.OK);
     }
 
-    @PostMapping("/api/account/logout")
-    public ResponseEntity<?> logout(HttpServletRequest req, HttpServletResponse res) {
-        accountHelper.logout(req, res);
-        return new ResponseEntity<>(HttpStatus.OK);
+    private boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return false;
+        }
+        return authentication.isAuthenticated();
     }
+    
+    //    @PostMapping("/api/account/logout")
+//    public ResponseEntity<?> logout(HttpServletRequest req, HttpServletResponse res) {
+//        accountHelper.logout(req, res);
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 
     @GetMapping("/api/account/token")
     public ResponseEntity<?> regenerate(HttpServletRequest req) {

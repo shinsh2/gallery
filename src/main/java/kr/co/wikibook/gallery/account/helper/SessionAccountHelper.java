@@ -26,7 +26,7 @@ public class SessionAccountHelper implements AccountHelper {
     // 로그인
     @Override
     public String login(AccountLoginRequest loginReq, HttpServletRequest req, HttpServletResponse res) {
-        Member member = memberService.find(loginReq.getLoginId(), loginReq.getLoginPw());
+        Member member = memberService.find(loginReq.getUsername(), loginReq.getPassword());
 
         // 회원 데이터가 없으면
         if (member == null) {

@@ -35,7 +35,7 @@ logging:
     '[kr.co.wikibook]': debug
 #    org.hibernate.SQL: debug
 #    org.hibernate.type: trace
-#    org.springframework: warn
+    org.springframework.security: debug
     p6spy: info
 
 decorator:

@@ -6,7 +6,7 @@ export const join = (args) => {
 };
 
 // 로그인
-export const login = (args) => {
+export const login = (args, headers) => {
     return httpRequester.post("/v1/api/account/login", args).catch(e => e.response);
 };
 
