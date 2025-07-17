@@ -59,7 +59,14 @@ public class SecurityConfig {
 		http
 //		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 //		.addFilterAfter(new CsrfTokenLoggerFilter(), CsrfFilter.class)
-		.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+		.securityMatcher("/actuator/**")
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/actuator/health").permitAll()
+            .requestMatchers("/actuator/info").permitAll() 
+            .requestMatchers("/actuator/prometheus").hasRole("MONITORING")
+            .requestMatchers("/actuator/**").hasRole("ADMIN")
+        )
+        .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 		.authorizeHttpRequests(authorize -> authorize.requestMatchers(PUBLIC).permitAll() 
 				.requestMatchers("/assets/**", "/img/**", "/favicon.ico", "/index.html").permitAll()
 //              .requestMatchers("/admin/**").hasRole("ADMIN") // Require ADMIN role for /admin/**
