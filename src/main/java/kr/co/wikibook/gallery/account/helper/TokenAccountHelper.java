@@ -1,5 +1,9 @@
 package kr.co.wikibook.gallery.account.helper;
 
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.wikibook.gallery.account.dto.AccountJoinRequest;
@@ -11,13 +15,10 @@ import kr.co.wikibook.gallery.common.util.TokenUtils;
 import kr.co.wikibook.gallery.member.entity.Member;
 import kr.co.wikibook.gallery.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
-
+@Slf4j
 @Service
-@Primary
 @RequiredArgsConstructor
 public class TokenAccountHelper implements AccountHelper {
 
@@ -47,6 +48,7 @@ public class TokenAccountHelper implements AccountHelper {
     // 회원가입
     @Override
     public void join(AccountJoinRequest joinReq) {
+    	log.debug(joinReq.toString());
         memberService.save(joinReq.getName(), joinReq.getLoginId(), joinReq.getLoginPw());
     }
 

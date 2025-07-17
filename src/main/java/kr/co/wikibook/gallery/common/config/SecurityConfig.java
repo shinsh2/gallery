@@ -14,6 +14,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -55,19 +57,24 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
+//		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 //		.addFilterAfter(new CsrfTokenLoggerFilter(), CsrfFilter.class)
 		.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
-				.authorizeHttpRequests(authorize -> authorize.requestMatchers(PUBLIC).permitAll() 
+		.authorizeHttpRequests(authorize -> authorize.requestMatchers(PUBLIC).permitAll() 
 				.requestMatchers("/assets/**", "/img/**", "/favicon.ico", "/index.html").permitAll()
 //              .requestMatchers("/admin/**").hasRole("ADMIN") // Require ADMIN role for /admin/**
-				.anyRequest().authenticated() // All other requests require authentication
-		).addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class).formLogin(
+				.anyRequest().authenticated())
+		.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+		.formLogin(
 				formLogin -> formLogin.loginPage("/login").loginProcessingUrl("/v1/api/account/login").permitAll())
-				.logout(logout -> logout.logoutUrl("/v1/api/account/logout").logoutSuccessUrl("/")
+		.logout(logout -> logout.logoutUrl("/v1/api/account/logout").logoutSuccessUrl("/")
 						.logoutSuccessHandler(logoutSuccessHandler()).permitAll())
-				.formLogin(Customizer.withDefaults())
-				.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-						.csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())); 
+		.formLogin(Customizer.withDefaults())
+		.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+						.csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
+		.securityContext(securityContext -> securityContext
+			     .securityContextRepository(new HttpSessionSecurityContextRepository()))
+		; 
 		return http.build();
 	}
 

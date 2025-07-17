@@ -19,11 +19,14 @@ import kr.co.wikibook.gallery.account.dto.AccountJoinRequest;
 import kr.co.wikibook.gallery.account.etc.AccountConstants;
 import kr.co.wikibook.gallery.account.helper.AccountHelper;
 import kr.co.wikibook.gallery.block.service.BlockService;
+import kr.co.wikibook.gallery.common.config.CustomUserDetails;
 import kr.co.wikibook.gallery.common.util.HttpUtils;
 import kr.co.wikibook.gallery.common.util.TokenUtils;
 import kr.co.wikibook.gallery.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1")
@@ -35,6 +38,8 @@ public class AccountController {
 
     @PostMapping("/api/account/join")
     public ResponseEntity<?> join(@RequestBody AccountJoinRequest joinReq) {
+    	log.debug(joinReq.toString());
+    	
         // 입력 값이 비어 있다면
         if (!StringUtils.hasLength(joinReq.getName()) || !StringUtils.hasLength(joinReq.getLoginId()) || !StringUtils.hasLength(joinReq.getLoginPw())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -73,6 +78,7 @@ public class AccountController {
 
     private boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.debug(authentication != null ? authentication.toString() : "No authentication found");
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
             return false;
         }

@@ -1,18 +1,21 @@
 package kr.co.wikibook.gallery.member.service;
 
+import java.util.Optional;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import kr.co.wikibook.gallery.common.util.HashUtils;
 import kr.co.wikibook.gallery.member.entity.Member;
 import kr.co.wikibook.gallery.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import kr.co.wikibook.gallery.common.util.HashUtils;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BaseMemberService implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원 데이터 저장
     @Override
@@ -21,7 +24,8 @@ public class BaseMemberService implements MemberService {
         String loginPwSalt = HashUtils.generateSalt(16);
 
         // 입력 패스워드에 솔트를 적용
-        String loginPwSalted = HashUtils.generateHash(loginPw, loginPwSalt);
+//        String loginPwSalted = HashUtils.generateHash(loginPw, loginPwSalt);
+        String loginPwSalted = passwordEncoder.encode(loginPw);
 
         // 회원 데이터 저장
         memberRepository.save(new Member(name, loginId, loginPwSalted, loginPwSalt));

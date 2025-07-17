@@ -1,17 +1,25 @@
 package kr.co.wikibook.gallery.account.helper;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.co.wikibook.gallery.account.dto.AccountJoinRequest;
 import kr.co.wikibook.gallery.account.dto.AccountLoginRequest;
 import kr.co.wikibook.gallery.account.etc.AccountConstants;
+import kr.co.wikibook.gallery.common.config.CustomUserDetails;
 import kr.co.wikibook.gallery.common.util.HttpUtils;
 import kr.co.wikibook.gallery.member.entity.Member;
 import kr.co.wikibook.gallery.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
+@Primary
 @RequiredArgsConstructor
 public class SessionAccountHelper implements AccountHelper {
 
@@ -40,13 +48,17 @@ public class SessionAccountHelper implements AccountHelper {
     // 회원 아이디 조회
     @Override
     public Integer getMemberId(HttpServletRequest req) {
-        Object memberId = HttpUtils.getSessionValue(req, AccountConstants.MEMBER_ID_NAME);
-
-        if (memberId != null) {
-            return (int) memberId;
-        }
-
-        return null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        log.debug(customUserDetails.toString());
+        return customUserDetails.getId();
+//        Object memberId = HttpUtils.getSessionValue(req, AccountConstants.MEMBER_ID_NAME);
+//
+//        if (memberId != null) {
+//            return (int) memberId;
+//        }
+//
+//        return null;
     }
 
     // 로그인 여부 확인
