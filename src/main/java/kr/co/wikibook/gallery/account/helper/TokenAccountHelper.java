@@ -11,7 +11,7 @@ import kr.co.wikibook.gallery.account.dto.AccountLoginRequest;
 import kr.co.wikibook.gallery.account.etc.AccountConstants;
 import kr.co.wikibook.gallery.block.service.BlockService;
 import kr.co.wikibook.gallery.common.util.HttpUtils;
-import kr.co.wikibook.gallery.common.util.TokenUtils;
+import kr.co.wikibook.gallery.common.util.JwtUtils;
 import kr.co.wikibook.gallery.member.entity.Member;
 import kr.co.wikibook.gallery.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +37,8 @@ public class TokenAccountHelper implements AccountHelper {
 
     // 회원 아이디 조회
     private Integer getMemberId(String token) {
-        if (TokenUtils.isValid(token)) {
-            Map<String, Object> tokenBody = TokenUtils.getBody(token);
+        if (JwtUtils.isValid(token)) {
+            Map<String, Object> tokenBody = JwtUtils.getBody(token);
             return (Integer) tokenBody.get(AccountConstants.MEMBER_ID_NAME);
         }
 
@@ -66,10 +66,10 @@ public class TokenAccountHelper implements AccountHelper {
         Integer memberId = member.getId();
 
         // 액세스 토큰 발급
-        String accessToken = TokenUtils.generate(AccountConstants.ACCESS_TOKEN_NAME, AccountConstants.MEMBER_ID_NAME, memberId, AccountConstants.ACCESS_TOKEN_EXP_MINUTES);
+        String accessToken = JwtUtils.generate(AccountConstants.ACCESS_TOKEN_NAME, AccountConstants.MEMBER_ID_NAME, memberId, AccountConstants.ACCESS_TOKEN_EXP_MINUTES);
 
         // 리프레시 토큰 발급
-        String refreshToken = TokenUtils.generate(AccountConstants.REFRESH_TOKEN_NAME, AccountConstants.MEMBER_ID_NAME, memberId, AccountConstants.REFRESH_TOKEN_EXP_MINUTES);
+        String refreshToken = JwtUtils.generate(AccountConstants.REFRESH_TOKEN_NAME, AccountConstants.MEMBER_ID_NAME, memberId, AccountConstants.REFRESH_TOKEN_EXP_MINUTES);
 
         // 리프레시 토큰 쿠키 저장(유효 시간을 0으로 입력해 웹 브라우저 종료 시 삭제)
         HttpUtils.setCookie(res, AccountConstants.REFRESH_TOKEN_NAME, refreshToken, 0);
@@ -88,7 +88,7 @@ public class TokenAccountHelper implements AccountHelper {
     @Override
     public boolean isLoggedIn(HttpServletRequest req) {
         // 액세스 토큰이 유효하다면
-        if (TokenUtils.isValid((getAccessToken(req)))) {
+        if (JwtUtils.isValid((getAccessToken(req)))) {
             return true;
         }
 
@@ -96,7 +96,7 @@ public class TokenAccountHelper implements AccountHelper {
         String refreshToken = getRefreshToken(req);
 
         // 리프레시 토큰의 유효성 확인
-        return TokenUtils.isValid(refreshToken) && !blockService.has(refreshToken);
+        return JwtUtils.isValid(refreshToken) && !blockService.has(refreshToken);
     }
 
     // 로그아웃

@@ -21,7 +21,7 @@ import kr.co.wikibook.gallery.account.helper.AccountHelper;
 import kr.co.wikibook.gallery.block.service.BlockService;
 import kr.co.wikibook.gallery.common.config.CustomUserDetails;
 import kr.co.wikibook.gallery.common.util.HttpUtils;
-import kr.co.wikibook.gallery.common.util.TokenUtils;
+import kr.co.wikibook.gallery.common.util.JwtUtils;
 import kr.co.wikibook.gallery.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -97,15 +97,15 @@ public class AccountController {
         String refreshToken = HttpUtils.getCookieValue(req, AccountConstants.REFRESH_TOKEN_NAME);
 
         // 리프레시 토큰이 유효하다면
-        if (StringUtils.hasLength(refreshToken) && TokenUtils.isValid(refreshToken) && !blockService.has(refreshToken)) {
+        if (StringUtils.hasLength(refreshToken) && JwtUtils.isValid(refreshToken) && !blockService.has(refreshToken)) {
             // 리프레시 토큰의 내부 값 조회
-            Map<String, Object> tokenBody = TokenUtils.getBody(refreshToken);
+            Map<String, Object> tokenBody = JwtUtils.getBody(refreshToken);
 
             // 리프레시 토큰의 회원 아이디 조회
             Integer memberId = (Integer) tokenBody.get(AccountConstants.MEMBER_ID_NAME);
 
             // 액세스 토큰 발급
-            accessToken = TokenUtils.generate(AccountConstants.ACCESS_TOKEN_NAME, AccountConstants.MEMBER_ID_NAME, memberId, AccountConstants.ACCESS_TOKEN_EXP_MINUTES);
+            accessToken = JwtUtils.generate(AccountConstants.ACCESS_TOKEN_NAME, AccountConstants.MEMBER_ID_NAME, memberId, AccountConstants.ACCESS_TOKEN_EXP_MINUTES);
         }
 
         return new ResponseEntity<>(accessToken, HttpStatus.OK);
